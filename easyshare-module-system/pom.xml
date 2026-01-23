@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.easyshare.boot</groupId>
+        <artifactId>easyshare</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>easyshare-module-system</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+
+    <description>
+        system 模块下，放通用业务，支撑上层的核心业务。
+        例如：用户等
+    </description>
+
+    <dependencies>
+        <!-- DB 相关 -->
+        <dependency>
+            <groupId>com.easyshare.boot</groupId>
+            <artifactId>easyshare-spring-boot-starter-mybatis</artifactId>
+        </dependency>
+
+        <!-- 业务组件 -->
+
+        <!-- web 相关 -->
+        <dependency>
+            <groupId>com.easyshare.boot</groupId>
+            <artifactId>easyshare-spring-boot-starter-security</artifactId>
+        </dependency>
+    </dependencies>
+</project>

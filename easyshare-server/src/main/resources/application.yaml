@@ -1,0 +1,134 @@
+server:
+  port: 48080
+
+spring:
+  application:
+    name: easyshare-server
+  profiles:
+    active: local
+  main:
+    allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。
+  jackson: # 时间格式化
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
+
+  datasource:
+    # ==================== Druid 数据源 ====================
+    druid:
+      # 初始化连接数
+      initial-size: 5
+      # 最小连接池数量
+      min-idle: 5
+      # 最大连接池数量
+      max-active: 20
+      # 获取连接时最大等待时间（毫秒）
+      max-wait: 60000
+
+      # 检测空闲连接的间隔时间
+      time-between-eviction-runs-millis: 60000
+      # 连接在池中最小生存时间
+      min-evictable-idle-time-millis: 300000
+
+      # 检测连接是否有效
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+      # PSCache（预编译缓存）提升性能
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+      # 监控统计拦截器
+      filters: stat,wall,slf4j
+
+      # 开启 Druid Web 监控
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        login-username: admin
+        login-password: admin123
+        reset-enable: false
+
+      # Web 应用监控
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
+
+# ==================== MyBatis-Plus ====================
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# ==================== 接口文档配置 ====================
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true # 开启 springdoc 自带的 Swagger UI 页面
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  default-flat-param-object: true # 参见 https://doc.xiaominfo.com/docs/faq/v4/knife4j-parameterobject-flat-param 文档
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# ==================== easy-share 相关 ====================
+easy-share:
+  openapi: # OpenAPI 配置
+    title: EasyShare 接口文档
+    description: 高校置物/二手交易平台后端 API 文档（管理端 + 用户端）
+    version: 1.0.0
+    contact:
+      name: yangjw
+      email: 3297632378@qq.com
+      url: https://github.com/YJWYJW6
+  security: # 安全配置
+    token-header: Authorization
+    token-parameter: token
+    password-encoder-length: 4 # 密码加密长度
+    jwt-secret: easy-share-college-item-exchange-platform
+    jwt-expire-seconds: 36000
+    jwt-issuer: easy-share
+    jwt-ignore-urls: # 忽略 JWT 验证的 URL
+      - /doc.html # Knife4j 文档主页（打开接口文档UI）
+      - /webjars/** # Swagger/Knife4j 前端静态资源（JS/CSS 等）
+      - /swagger-ui/** # Swagger UI 页面资源路径（新版 swagger-ui）
+      - /v3/api-docs/** # OpenAPI 3 文档 JSON 接口（Swagger读取这个生成页面）
+      - /uploads/** # 上传文件接口
+      - /admin/system/auth/** # 认证接口
+    allow-methods: # 允许的请求方法
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    allowed-headers: # 允许的请求头
+      - "*"
+    allow-origins: # 允许的来源
+      - "http://localhost:5173"
+    allow-credentials: true # 允许携带 cookie
+  system: # 系统配置
+    default-password: 123456
+  infra: # 基础设施配置
+    upload: # 文件上传配置
+      base-path: ${user.dir}/uploads # 文件上传基础路径
+      base-url: http://localhost:8080/uploads # 文件访问地址
+      max-size: 5242880 # 文件最大大小（单位 B）
+      allow-ext: # 允许的文件扩展名
+        - jpg
+        - jpeg
+        - png
+        - webp

@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.easyshare.boot</groupId>
+        <artifactId>easyshare</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>easyshare-module-infra</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+
+    <description>EasyShare 基础设施模块（Infra）：提供文件上传、存储、通用工具与系统级支撑能力</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.easyshare.boot</groupId>
+            <artifactId>easyshare-spring-boot-starter-security</artifactId>
+        </dependency>
+    </dependencies>
+</project>
