@@ -1,4 +1,4 @@
-package com.yangjw.easyshare.module.system.controller.admin.auth;
+package com.yangjw.easyshare.module.system.controller.app.auth;
 
 import com.yangjw.easyshare.framework.common.pojo.CommonResult;
 import com.yangjw.easyshare.module.system.controller.vo.auth.AuthLoginReqVO;
@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
-@Tag(name = "管理后台 - 认证")
+@Tag(name = "app端 - 认证")
 @RestController
-@RequestMapping("/admin/system/auth")
+@RequestMapping("/app/system/auth")
 @Validated
 @RequiredArgsConstructor
-public class AuthController {
+public class AppAuthController {
 
     private final IAuthService authService;
 
@@ -30,7 +29,7 @@ public class AuthController {
     @Operation(summary = "使用账号密码登录")
     @PostMapping("/login")
     public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
-        return CommonResult.success(authService.loginAdmin(reqVO));
+        return CommonResult.success(authService.loginApp(reqVO));
     }
 
 

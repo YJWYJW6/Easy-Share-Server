@@ -48,7 +48,7 @@ public class UserPageRespVO {
      * 用户角色：1学生 2学校负责人 3超级管理员
      */
     @Schema(description = "用户角色", example = "1")
-    private Integer role;
+    private String role;
 
     /**
      * 状态：1正常 0禁用

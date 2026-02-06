@@ -3,11 +3,8 @@ package com.yangjw.easyshare.framework.security.core.utils;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.jwt.JWT;
-import cn.hutool.jwt.JWTUtil;
-import cn.hutool.jwt.JWTPayload;
-import cn.hutool.jwt.JWTValidator;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.jwt.*;
 import cn.hutool.jwt.signers.JWTSigner;
 import cn.hutool.jwt.signers.JWTSignerUtil;
 import com.yangjw.easyshare.framework.security.config.properties.EasyShareSecurityProperties;
@@ -77,9 +74,9 @@ public class JwtUtils {
 
         // JWT payload
         Map<String, Object> payload = new HashMap<>();
-        payload.put(JWTPayload.ISSUER, properties.getJwtIssuer()); // 签发者
-        payload.put(JWTPayload.ISSUED_AT, now); // 签发时间
-        payload.put(JWTPayload.EXPIRES_AT, expireAt); // 过期时间
+        payload.put(RegisteredPayload.ISSUER, properties.getJwtIssuer()); // 签发者
+        payload.put(RegisteredPayload.ISSUED_AT, now); // 签发时间
+        payload.put(RegisteredPayload.EXPIRES_AT, expireAt); // 过期时间
 
         // 自定义字段（业务字段）
         payload.put(CLAIM_USER_ID, loginUser.getUserId()); // 用户 ID
@@ -88,7 +85,7 @@ public class JwtUtils {
         payload.put(CLAIM_USER_STATUS, loginUser.getStatus()); // 用户状态
         payload.put(CLAIM_SCHOOL_ID, loginUser.getSchoolId()); //  学校
         payload.put(CLAIM_VERIFY_STATUS, loginUser.getVerifyStatus()); // 用户认证状态
-        payload.put(CLAIM_ROLE_KEY, loginUser.getRoleKey()); // Spring Security 权限标识
+        payload.put(CLAIM_ROLE_KEY, loginUser.getRole()); // Spring Security 权限标识
 
         // 使用 secret 对 token 签名（HS256）
         return JWTUtil.createToken(payload, getSecretKey());
@@ -103,7 +100,7 @@ public class JwtUtils {
      * 2）是否过期（exp）
      */
     public boolean validate(String token) {
-        if (StrUtil.isBlank(token)) {
+        if (CharSequenceUtil.isBlank(token)) {
             return false;
         }
         try {
@@ -129,10 +126,10 @@ public class JwtUtils {
      * @return true=已过期；false=未过期
      */
     public boolean isExpired(String token) {
-        if (StrUtil.isBlank(token)) {
+        if (CharSequenceUtil.isBlank(token)) {
             return true;
         }
-        Date expireAt = (Date) parse(token).getPayload(JWTPayload.EXPIRES_AT);
+        Date expireAt = (Date) parse(token).getPayload(RegisteredPayload.EXPIRES_AT);
         return expireAt == null || expireAt.before(new Date());
     }
 
@@ -152,7 +149,7 @@ public class JwtUtils {
      * 如果 Claim 字段不存在，则返回 null
      */
     public Object parseClaim(String token, String key) {
-        if (StrUtil.isBlank(token)) {
+        if (CharSequenceUtil.isBlank(token)) {
             return null;
         }
         return parse(token).getPayload(key);
@@ -175,9 +172,9 @@ public class JwtUtils {
      * @param token JWT Token
      * @return role，解析失败返回 null
      */
-    public Integer parseRole(String token) {
+    public String parseRole(String token) {
         Object ut = parseClaim(token, CLAIM_USER_ROLE);
-        return ut == null ? null : Integer.valueOf(ut.toString());
+        return ut == null ? null : ut.toString();
     }
 
     /**
@@ -201,17 +198,17 @@ public class JwtUtils {
      */
     public String getToken(HttpServletRequest request, String headerName, String prefix) {
         String value = request.getHeader(headerName);
-        if (StrUtil.isBlank(value)) {
+        if (CharSequenceUtil.isBlank(value)) {
             return null;
         }
 
         // 允许传 null/空，则直接返回
-        if (StrUtil.isBlank(prefix)) {
+        if (CharSequenceUtil.isBlank(prefix)) {
             return value.trim();
         }
 
         // 不区分大小写匹配 Bearer 前缀
-        if (StrUtil.startWithIgnoreCase(value, prefix)) {
+        if (CharSequenceUtil.startWithIgnoreCase(value, prefix)) {
             return value.substring(prefix.length()).trim();
         }
 
@@ -250,7 +247,7 @@ public class JwtUtils {
 
         Object rk = parseClaim(token, CLAIM_ROLE_KEY);
         if (rk != null) {
-            user.setRoleKey(rk.toString());
+            user.setRole(rk.toString());
         }
 
         return user;

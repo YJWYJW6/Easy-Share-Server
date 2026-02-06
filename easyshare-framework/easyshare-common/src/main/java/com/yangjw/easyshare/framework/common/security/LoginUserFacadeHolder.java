@@ -29,4 +29,22 @@ public class LoginUserFacadeHolder {
     public static Long getLoginUserId() {
         return FACADE == null ? null : FACADE.getLoginUserId();
     }
+
+    /**
+     * 获取登录用户角色
+     *
+     * @return 登录用户角色
+     */
+    public static String getLoginUserRole() {
+        return FACADE == null ? null : FACADE.getLoginUserRole();
+    }
+
+    /**
+     * 获取登录用户所属学校
+     *
+     * @return 登录用户所属学校
+     */
+    public static Long getLoginUserSchoolId() {
+        return FACADE == null ? null : FACADE.getLoginUserSchoolId();
+    }
 }

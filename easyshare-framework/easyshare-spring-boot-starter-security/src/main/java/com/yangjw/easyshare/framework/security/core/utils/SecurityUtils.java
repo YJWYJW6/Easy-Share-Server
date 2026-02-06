@@ -80,12 +80,7 @@ public class SecurityUtils {
         return user.getUserId();
     }
 
-    public static String getLoginUsername() {
-        CurrentLoginUser user = getLoginUserRequired();
-        return user.getUsername();
-    }
-
-    public static Integer getLoginUserRole() {
+    public static String getLoginUserRole() {
         CurrentLoginUser user = getLoginUserRequired();
         return user.getRole();
     }

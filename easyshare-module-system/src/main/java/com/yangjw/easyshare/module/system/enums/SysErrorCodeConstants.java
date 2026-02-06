@@ -22,6 +22,7 @@ public interface SysErrorCodeConstants {
     ErrorCode USER_CREATE_ROLE_INVALID = new ErrorCode(1_002_002_005, "创建用户角色不合法");
     ErrorCode USER_NO_PERMISSION_CREATE = new ErrorCode(1_002_002_006, "无权限创建此角色");
     ErrorCode USER_NO_PERMISSION_ACCESS = new ErrorCode(1_002_002_007, "无此权限访问此用户");
+    ErrorCode USER_ID_NOT_EMPTY = new ErrorCode(1_002_002_008, "用户ID不能为空");
 
 
 }

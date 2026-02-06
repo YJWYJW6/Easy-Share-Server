@@ -8,27 +8,56 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * 基于 Spring Security 的登录用户 Facade 实现
+ *
+ * 作用：
+ * - 从 SecurityContextHolder 中获取 CurrentLoginUser
+ * - 提供给 common / datapermission 等模块使用
+ */
 @Component
 public class SecurityLoginUserFacade implements LoginUserFacade {
 
     @PostConstruct
     public void init() {
+        // 注册到 common 层的 Holder
         LoginUserFacadeHolder.set(this);
     }
 
     @Override
     public Long getLoginUserId() {
-        // 获取当前登录用户
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
+        CurrentLoginUser user = getCurrentLoginUser();
+        return user == null ? null : user.getUserId();
+    }
+
+    @Override
+    public String getLoginUserRole() {
+        CurrentLoginUser user = getCurrentLoginUser();
+        return user == null ? null : user.getRole();
+    }
+
+    @Override
+    public Long getLoginUserSchoolId() {
+        CurrentLoginUser user = getCurrentLoginUser();
+        return user == null ? null : user.getSchoolId();
+    }
+
+    /**
+     * 从 Spring Security 中获取当前登录用户
+     *
+     * @return CurrentLoginUser or null
+     */
+    private CurrentLoginUser getCurrentLoginUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
             return null;
         }
-        // 获取用户信息
-        Object principal = auth.getPrincipal();
+
+        Object principal = authentication.getPrincipal();
         if (!(principal instanceof CurrentLoginUser)) {
             return null;
         }
-        // 获取用户编号
-        return ((CurrentLoginUser) principal).getUserId();
+
+        return (CurrentLoginUser) principal;
     }
 }

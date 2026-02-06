@@ -4,6 +4,7 @@ import com.yangjw.easyshare.framework.common.exception.ServiceException;
 import com.yangjw.easyshare.framework.common.exception.enums.GlobalErrorCodeConstants;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -13,6 +14,9 @@ import java.io.Serializable;
  */
 @Data
 public class CommonResult<T> implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * {@link GlobalErrorCodeConstants}

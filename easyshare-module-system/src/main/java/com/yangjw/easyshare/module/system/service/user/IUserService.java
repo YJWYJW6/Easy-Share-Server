@@ -3,6 +3,7 @@ package com.yangjw.easyshare.module.system.service.user;
 import com.yangjw.easyshare.framework.common.pojo.PageResult;
 import com.yangjw.easyshare.module.system.controller.admin.user.vo.*;
 import com.yangjw.easyshare.module.system.dal.dataobject.user.UserDO;
+import com.yangjw.easyshare.module.system.enums.user.UserStatusEnum;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +43,11 @@ public interface IUserService {
      * 修改用户
      */
     Integer updateUserProfile(UserUpdateProfileReqVO reqVO);
+
+    /**
+     * 修改用户状态
+     */
+    Integer updateUserStatus(Long id, UserStatusEnum status);
 
     /**
      * 获取用户详情

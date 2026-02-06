@@ -1,7 +1,7 @@
 package com.yangjw.easyshare.module.system.service.user.impl;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -19,7 +19,7 @@ import com.yangjw.easyshare.module.system.dal.dataobject.user.UserDO;
 import com.yangjw.easyshare.module.system.dal.mysql.user.UserMapper;
 import com.yangjw.easyshare.module.system.enums.SysErrorCodeConstants;
 import com.yangjw.easyshare.module.system.enums.user.UserGenderEnum;
-import com.yangjw.easyshare.module.system.enums.user.UserRoleEnum;
+import com.yangjw.easyshare.framework.common.enums.UserRoleEnum;
 import com.yangjw.easyshare.module.system.enums.user.UserStatusEnum;
 import com.yangjw.easyshare.module.system.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -96,8 +96,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public PageResult<UserPageRespVO> getUserPage(UserPageReqVO reqVO) {
         // 1. 数据权限：学校管理员只能看自己学校
-        Integer role = SecurityUtils.getLoginUserRole();
-        if (ObjectUtil.equal(UserRoleEnum.SCHOOL_ADMIN.getCode(), role)) {
+        if (ObjectUtil.equal(UserRoleEnum.SCHOOL_ADMIN.getRoleKey(), SecurityUtils.getLoginUserRole())) {
             reqVO.setSchoolId(SecurityUtils.getLoginSchoolId()); // 强制覆盖
         }
 
@@ -107,7 +106,7 @@ public class UserServiceImpl implements IUserService {
         // 3. 动态条件
         LambdaQueryWrapper<UserDO> qw = Wrappers.lambdaQuery();
         // keyword: username / nickname / memberNo
-        if (StrUtil.isNotBlank(reqVO.getKeyword())) {
+        if (CharSequenceUtil.isNotBlank(reqVO.getKeyword())) {
             String kw = reqVO.getKeyword().trim();
             qw.and(w -> w.like(UserDO::getUsername, kw)
                     .or().like(UserDO::getNickname, kw)
@@ -118,7 +117,7 @@ public class UserServiceImpl implements IUserService {
         qw.eq(reqVO.getStatus() != null, UserDO::getStatus, reqVO.getStatus());
         qw.eq(reqVO.getVerifyStatus() != null, UserDO::getVerifyStatus, reqVO.getVerifyStatus());
         // phone
-        qw.eq(StrUtil.isNotBlank(reqVO.getPhone()), UserDO::getPhone, reqVO.getPhone());
+        qw.eq(CharSequenceUtil.isNotBlank(reqVO.getPhone()), UserDO::getPhone, reqVO.getPhone());
         // schoolId（超管可筛选）
         qw.eq(reqVO.getSchoolId() != null, UserDO::getSchoolId, reqVO.getSchoolId());
         // createTime range
@@ -157,11 +156,11 @@ public class UserServiceImpl implements IUserService {
     @Override
     public Integer createUser(UserCreateReqVO reqVO) {
         // 1. 创建角色权限
-        Integer operatorRole = SecurityUtils.getLoginUserRole();
+        String operatorRole = SecurityUtils.getLoginUserRole();
         validateCreatePermission(operatorRole, reqVO.getRole());
 
         // 2. 学校 id 校验，如果是学校负责人只能创建自己学校的
-        if (ObjectUtil.equal(UserRoleEnum.SCHOOL_ADMIN.getCode(), operatorRole)) {
+        if (ObjectUtil.equal(UserRoleEnum.SCHOOL_ADMIN.getRoleKey(), operatorRole)) {
             reqVO.setSchoolId(SecurityUtils.getLoginSchoolId());
         }
 
@@ -192,7 +191,7 @@ public class UserServiceImpl implements IUserService {
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        if (StrUtil.isBlank(reqVO.getAvatar())) { // 默认头像
+        if (CharSequenceUtil.isBlank(reqVO.getAvatar())) { // 默认头像
             user.setAvatar(AvatarUtils.diceBearAvatarByUsername(reqVO.getUsername()));
             // 或 randomDiceBearAvatar()
         }
@@ -225,6 +224,24 @@ public class UserServiceImpl implements IUserService {
     }
 
     /**
+     * 更新用户状态
+     */
+    @Override
+    public Integer updateUserStatus(Long id, UserStatusEnum status) {
+        // 校验参数
+        if (id == null) {
+            throw new ServiceException(SysErrorCodeConstants.USER_ID_NOT_EMPTY);
+        }
+        // 校验权限
+        validateUserAccessPermission(userMapper.selectById(id));
+        // 修改状态
+        UserDO user = new UserDO();
+        user.setId(id);
+        user.setStatus(status.getCode());
+        return userMapper.updateById(user);
+    }
+
+    /**
      * 获取用户详情
      */
     @Override
@@ -243,7 +260,7 @@ public class UserServiceImpl implements IUserService {
      * 校验用户名是否存在
      */
     private boolean isUsernameExists(String username) {
-        if (StrUtil.isBlank(username)){
+        if (CharSequenceUtil.isBlank(username)) {
             return false;
         }
         return userMapper.selectByUsername(username) != null;
@@ -253,7 +270,7 @@ public class UserServiceImpl implements IUserService {
      * 校验手机号是否存在
      */
     private boolean isPhoneExists(String phone) {
-        if (StrUtil.isBlank(phone)){
+        if (CharSequenceUtil.isBlank(phone)) {
             return false;
         }
         return userMapper.selectByPhone(phone) != null;
@@ -263,7 +280,7 @@ public class UserServiceImpl implements IUserService {
      * 校验手机号是否存在（忽略指定用户）
      */
     private boolean isPhoneExistsIgnoreUser(String phone, Long ignoreUserId) {
-        if (StrUtil.isBlank(phone)) {
+        if (CharSequenceUtil.isBlank(phone)) {
             return false;
         }
         UserDO user = userMapper.selectByPhone(phone);
@@ -277,7 +294,7 @@ public class UserServiceImpl implements IUserService {
      * 验证邮箱是否存在
      */
     private boolean isEmailExists(String email) {
-        if (StrUtil.isBlank(email)){
+        if (CharSequenceUtil.isBlank(email)) {
             return false;
         }
         return userMapper.selectByEmail(email) != null;
@@ -287,7 +304,7 @@ public class UserServiceImpl implements IUserService {
      * 校验邮箱是否存在（忽略指定用户）
      */
     private boolean isEmailExistsIgnoreUser(String email, Long ignoreUserId) {
-        if (StrUtil.isBlank(email)) {
+        if (CharSequenceUtil.isBlank(email)) {
             return false;
         }
         UserDO user = userMapper.selectByPhone(email);
@@ -308,10 +325,10 @@ public class UserServiceImpl implements IUserService {
 
         // 2. 验证当前操作人信息
         Long operatorId = SecurityUtils.getLoginUserId(); // 当前操作人
-        Integer operatorRole = SecurityUtils.getLoginUserRole(); // 当前操作人角色
+        String operatorRole = SecurityUtils.getLoginUserRole(); // 当前操作人角色
         Long operatorSchoolId = SecurityUtils.getLoginSchoolId(); // 当前操作人学校
         Long targetUserId = targetUser.getId();
-        Integer targetUserRole = targetUser.getRole(); // 目标用户角色
+        String targetUserRole = targetUser.getRole(); // 目标用户角色
         Long targetUserSchoolId = targetUser.getSchoolId(); // 目标用户学校
         if (operatorId == null || operatorRole == null) {
             throw new ServiceException(GlobalErrorCodeConstants.UNAUTHORIZED);
@@ -321,17 +338,17 @@ public class UserServiceImpl implements IUserService {
         // 3.1 目标是自己
         if (ObjectUtil.equal(operatorId, targetUserId)) return;
         // 3.2 超管：允许修改（自己/学生/学校管理员）
-        if (ObjectUtil.equal(operatorRole, UserRoleEnum.SUPER_ADMIN.getCode())) {
-            // 学生管理员 或者 学生
-            if (ObjectUtil.equal(targetUserRole, UserRoleEnum.STUDENT.getCode()) ||
-                    ObjectUtil.equal(targetUserRole, UserRoleEnum.SCHOOL_ADMIN.getCode())
-            ) return;
-        }
+        if (ObjectUtil.equal(operatorRole, UserRoleEnum.SUPER_ADMIN.getRoleKey())
+                && (
+                ObjectUtil.equal(targetUserRole, UserRoleEnum.STUDENT.getRoleKey())
+                        || ObjectUtil.equal(targetUserRole, UserRoleEnum.SCHOOL_ADMIN.getRoleKey()))
+        ) return;
+
         // 3.3 学校管理员
-        if (ObjectUtil.equal(operatorRole, UserRoleEnum.SCHOOL_ADMIN.getCode())) {
+        if (ObjectUtil.equal(operatorRole, UserRoleEnum.SCHOOL_ADMIN.getRoleKey())) {
             // 2) 只能修改本学校的学生
             boolean sameSchool = ObjectUtil.equal(operatorSchoolId, targetUserSchoolId);
-            boolean targetIsStudent = ObjectUtil.equal(targetUser.getRole(), UserRoleEnum.STUDENT.getCode());
+            boolean targetIsStudent = ObjectUtil.equal(targetUser.getRole(), UserRoleEnum.STUDENT.getRoleKey());
             if (sameSchool && targetIsStudent) {
                 return;
             }
@@ -344,26 +361,26 @@ public class UserServiceImpl implements IUserService {
     /**
      * 校验当前登录人是否有权限创建该用户
      */
-    private void validateCreatePermission(Integer operatorRole, Integer targetRole) {
+    private void validateCreatePermission(String operatorRole, String targetRole) {
         // 1. 验证当前登录人身份
         if (operatorRole == null) {
             throw new ServiceException(GlobalErrorCodeConstants.UNAUTHORIZED);
         }
 
         // 2. 校验目标身份是否合法
-        if (targetRole == null || !UserRoleEnum.isExists(targetRole)) {
+        if (!UserRoleEnum.isValid(targetRole)) {
             throw new ServiceException(SysErrorCodeConstants.USER_CREATE_ROLE_INVALID);
         }
 
         // 3. 判断创建人是否有权限
         // 3.1 创建人是学生，禁止创建任何用户
-        if (operatorRole.equals(UserRoleEnum.STUDENT.getCode())) {
+        if (operatorRole.equals(UserRoleEnum.STUDENT.getRoleKey())) {
             throw new ServiceException(SysErrorCodeConstants.USER_NO_PERMISSION_CREATE);
         }
 
         // 3.2 创建人是学校管理员，只能创建学生
-        if (operatorRole.equals(UserRoleEnum.SCHOOL_ADMIN.getCode())) {
-            if (!targetRole.equals(UserRoleEnum.STUDENT.getCode())) {
+        if (operatorRole.equals(UserRoleEnum.SCHOOL_ADMIN.getRoleKey())) {
+            if (!targetRole.equals(UserRoleEnum.STUDENT.getRoleKey())) {
                 // 创建者不是学生
                 throw new ServiceException(SysErrorCodeConstants.USER_NO_PERMISSION_CREATE);
             }
@@ -372,8 +389,8 @@ public class UserServiceImpl implements IUserService {
         }
 
         // 3.3 超级管理员：可以创建学生、学校管理员，但不允许创建超级管理员
-        if (operatorRole.equals(UserRoleEnum.SUPER_ADMIN.getCode())) {
-            if (targetRole.equals(UserRoleEnum.SUPER_ADMIN.getCode())) {
+        if (operatorRole.equals(UserRoleEnum.SUPER_ADMIN.getRoleKey())) {
+            if (targetRole.equals(UserRoleEnum.SUPER_ADMIN.getRoleKey())) {
                 throw new ServiceException(SysErrorCodeConstants.USER_NO_PERMISSION_CREATE);
             }
             return;

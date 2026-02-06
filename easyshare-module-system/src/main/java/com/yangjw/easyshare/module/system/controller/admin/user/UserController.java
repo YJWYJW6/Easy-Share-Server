@@ -4,6 +4,7 @@ import com.yangjw.easyshare.framework.common.pojo.CommonResult;
 import com.yangjw.easyshare.framework.common.pojo.PageResult;
 import com.yangjw.easyshare.framework.common.pojo.RowResult;
 import com.yangjw.easyshare.module.system.controller.admin.user.vo.*;
+import com.yangjw.easyshare.module.system.enums.user.UserStatusEnum;
 import com.yangjw.easyshare.module.system.service.user.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,6 +46,24 @@ public class UserController {
     @Operation(summary = "创建用户")
     public CommonResult<RowResult> createUser(@Validated @RequestBody UserCreateReqVO reqVO) {
         return CommonResult.rows(userService.createUser(reqVO));
+    }
+
+    /**
+     * 启用用户
+     */
+    @PutMapping("/enable/{id}")
+    @Operation(summary = "启用用户")
+    public CommonResult<RowResult> enableUser(@PathVariable("id") Long id) {
+        return CommonResult.rows(userService.updateUserStatus(id, UserStatusEnum.ENABLE));
+    }
+
+    /**
+     * 禁用用户
+     */
+    @PutMapping("/disable/{id}")
+    @Operation(summary = "禁用用户")
+    public CommonResult<RowResult> disableUser(@PathVariable("id") Long id) {
+        return CommonResult.rows(userService.updateUserStatus(id, UserStatusEnum.DISABLE));
     }
 
     /**

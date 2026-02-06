@@ -24,12 +24,7 @@ public class CurrentLoginUser implements Serializable {
     /**
      * 用户类型
      */
-    private Integer role;
-
-    /**
-     * 角色key
-     */
-    private String roleKey;
+    private String role;
 
     /**
      * 昵称

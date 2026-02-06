@@ -132,3 +132,4 @@ easy-share:
         - jpeg
         - png
         - webp
+        - svg

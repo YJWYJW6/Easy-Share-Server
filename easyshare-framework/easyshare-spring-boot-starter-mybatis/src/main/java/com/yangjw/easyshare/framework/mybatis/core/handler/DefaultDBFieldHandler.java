@@ -1,4 +1,4 @@
-package com.yangjw.easyshare.framework.mybatis.handler;
+package com.yangjw.easyshare.framework.mybatis.core.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.yangjw.easyshare.framework.common.security.LoginUserFacadeHolder;
@@ -27,12 +27,10 @@ public class DefaultDBFieldHandler implements MetaObjectHandler {
             LocalDateTime current = LocalDateTime.now();
             // 创建时间为空，则以当前时间为插入时间
             if (Objects.isNull(baseDO.getCreateTime())) {
-                System.out.println("current" + current);
                 baseDO.setCreateTime(current);
             }
             // 更新时间为空，则以当前时间为更新时间
             if (Objects.isNull(baseDO.getUpdateTime())) {
-                System.out.println("current" + current);
                 baseDO.setUpdateTime(current);
             }
 

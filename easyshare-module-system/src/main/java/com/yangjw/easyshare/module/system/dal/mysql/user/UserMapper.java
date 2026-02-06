@@ -54,7 +54,7 @@ public interface UserMapper extends BaseMapper<UserDO> {
     /**
      * 根据 ID 查询角色
      */
-    default Integer selectRoleById(Long id) {
+    default String selectRoleById(Long id) {
         LambdaQueryWrapper<UserDO> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserDO::getId, id);
         return selectOne(queryWrapper).getRole();

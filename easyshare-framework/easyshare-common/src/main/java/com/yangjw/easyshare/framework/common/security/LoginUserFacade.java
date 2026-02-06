@@ -6,5 +6,10 @@ package com.yangjw.easyshare.framework.common.security;
  * @author yangjw
  */
 public interface LoginUserFacade {
+
     Long getLoginUserId();
+
+    String getLoginUserRole();
+
+    Long getLoginUserSchoolId();
 }

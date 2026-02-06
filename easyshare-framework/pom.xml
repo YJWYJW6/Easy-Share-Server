@@ -21,9 +21,10 @@
         如果是业务组件，Maven 名字会包含 biz
     </description>
     <modules>
+        <module>easyshare-common</module>
+        <module>easyshare-spring-boot-starter-biz-data-permission</module>
         <module>easyshare-spring-boot-starter-web</module>
         <module>easyshare-spring-boot-starter-mybatis</module>
-        <module>easyshare-common</module>
         <module>easyshare-spring-boot-starter-security</module>
     </modules>
 

@@ -1,8 +1,8 @@
 package com.yangjw.easyshare.framework.security.core.filter;
 
 import cn.hutool.core.text.AntPathMatcher;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yangjw.easyshare.framework.common.exception.ServiceException;
 import com.yangjw.easyshare.framework.common.exception.enums.GlobalErrorCodeConstants;
@@ -69,7 +69,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             // 2. 从请求头拿 Token
             String token = jwtUtils.getToken(request, properties.getTokenHeader(), properties.getTokenPrefix());
             // token 缺失
-            if (StrUtil.isBlank(token)) {
+            if (CharSequenceUtil.isBlank(token)) {
                 log.info("token 缺失：{} 拦截", token);
                 throw new ServiceException(GlobalErrorCodeConstants.UNAUTHORIZED);
             }
@@ -108,9 +108,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
      */
     private void saveToSecurityContext(HttpServletRequest request, CurrentLoginUser loginUser) {
         // 1. 获取角色键，封装权限
-        String roleKey = loginUser.getRoleKey();
+        String roleKey = loginUser.getRole();
         List<SimpleGrantedAuthority> authorities =
-                StrUtil.isBlank(roleKey)
+                CharSequenceUtil.isBlank(roleKey)
                         ? List.of()
                         : List.of(new SimpleGrantedAuthority(roleKey));
 

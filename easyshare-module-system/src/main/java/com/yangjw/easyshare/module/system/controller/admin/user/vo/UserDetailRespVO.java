@@ -115,7 +115,7 @@ public class UserDetailRespVO {
      * 用户角色
      */
     @Schema(description = "用户角色", example = "1")
-    private Integer role;
+    private String role;
 
     /**
      * 状态

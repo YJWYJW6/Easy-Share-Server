@@ -6,16 +6,17 @@ import com.yangjw.easyshare.framework.security.config.properties.EasyShareSecuri
 import com.yangjw.easyshare.framework.security.core.pojo.CurrentLoginUser;
 import com.yangjw.easyshare.framework.security.core.utils.JwtUtils;
 import com.yangjw.easyshare.framework.security.core.utils.SecurityUtils;
-import com.yangjw.easyshare.module.system.controller.admin.auth.vo.AuthLoginReqVO;
-import com.yangjw.easyshare.module.system.controller.admin.auth.vo.AuthLoginRespVO;
+import com.yangjw.easyshare.module.system.controller.vo.auth.AuthLoginReqVO;
+import com.yangjw.easyshare.module.system.controller.vo.auth.AuthLoginRespVO;
 import com.yangjw.easyshare.module.system.convert.auth.CurrentLoginUserConvert;
 import com.yangjw.easyshare.module.system.dal.dataobject.user.UserDO;
 import com.yangjw.easyshare.module.system.enums.SysErrorCodeConstants;
+import com.yangjw.easyshare.module.system.enums.auth.LoginType;
 import com.yangjw.easyshare.module.system.enums.user.UserStatusEnum;
-import com.yangjw.easyshare.module.system.enums.user.UserRoleEnum;
+import com.yangjw.easyshare.framework.common.enums.UserRoleEnum;
 import com.yangjw.easyshare.module.system.service.auth.IAuthService;
 import com.yangjw.easyshare.module.system.service.user.IUserService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,48 +27,73 @@ import java.time.LocalDateTime;
  * @author yangjw
  */
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
-    @Resource
-    private IUserService userService;
+    // service
+    private final IUserService userService;
 
-    @Resource
-    private CurrentLoginUserConvert currentLoginUserConvert;
+    // convert
+    private final CurrentLoginUserConvert currentLoginUserConvert;
 
-    @Resource
-    private EasyShareSecurityProperties properties;
+    // properties
+    private final EasyShareSecurityProperties properties;
 
-    @Resource
-    private JwtUtils jwtUtils;
+    // util
+    private final JwtUtils jwtUtils;
 
+    /**
+     * APP 登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
     @Override
     public AuthLoginRespVO loginApp(AuthLoginReqVO reqVO) {
-        return null;
+        return doLogin(reqVO, LoginType.APP);
     }
 
+    /**
+     * 管理端登录
+     *
+     * @param reqVO 登录信息
+     * @return 登录结果
+     */
     @Override
     public AuthLoginRespVO loginAdmin(AuthLoginReqVO reqVO) {
+        return doLogin(reqVO, LoginType.ADMIN);
+    }
+
+    private AuthLoginRespVO doLogin(AuthLoginReqVO reqVO, LoginType loginType) {
+        // 0. 当前时间
         LocalDateTime now = LocalDateTime.now();
 
+        // 1. 查询用户
         UserDO user = userService.getUserByUsername(reqVO.getUsername());
 
-        // 校验用户是否合法
+        // 2. 通用校验
         checkUserValid(user);
-        // 只允许管理员登录
-        checkAdmin(user);
-        // 校验密码
         checkPassword(reqVO.getPassword(), user.getPassword());
 
-        // 记录登录信息
-        userService.recordLoginLog(user.getId(), now, SecurityUtils.getLoginUserIP());
+        // 3. 登录类型校验
+        switch (loginType) {
+            case APP -> checkStudent(user);
+            case ADMIN -> checkAdmin(user);
+            default -> throw new IllegalStateException("未知登录类型");
+        }
 
-        // 构建 jwt
+        // 4. 记录登录信息
+        userService.recordLoginLog(
+                user.getId(),
+                now,
+                SecurityUtils.getLoginUserIP()
+        );
+
+        // 5. 构建 JWT
         CurrentLoginUser currentLoginUser = currentLoginUserConvert.convert(user);
-        // 角色 key，用于 security 获取角色
-        currentLoginUser.setRoleKey(UserRoleEnum.toSecurityRole(user.getRole()));
         String token = jwtUtils.generateToken(currentLoginUser);
 
-        // 封装返回对象
+        // 6. 返回结果
         return AuthLoginRespVO.builder()
                 .token(token)
                 .expiresIn(properties.getJwtExpireSeconds())
@@ -75,12 +101,21 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     /**
-     * 校验是否是管理员
+     * 校验是否是管理员（学校管理员 or 超级管理员）
      */
     private void checkAdmin(UserDO user) {
-        if (!UserRoleEnum.SUPER_ADMIN.getCode().equals(user.getRole()) &&
-        !UserRoleEnum.SCHOOL_ADMIN.getCode().equals(user.getRole())) {
+        if (!UserRoleEnum.SUPER_ADMIN.getRoleKey().equals(user.getRole()) &&
+                !UserRoleEnum.SCHOOL_ADMIN.getRoleKey().equals(user.getRole())) {
             throw new ServiceException(SysErrorCodeConstants.AUTH_LOGIN_NON_ADMIN_RESTRICTION);
+        }
+    }
+
+    /**
+     * 校验学生
+     */
+    private void checkStudent(UserDO user) {
+        if (!UserRoleEnum.STUDENT.getRoleKey().equals(user.getRole())) {
+            throw new ServiceException(SysErrorCodeConstants.AUTH_LOGIN_BAD_CREDENTIALS);
         }
     }
 
@@ -103,7 +138,7 @@ public class AuthServiceImpl implements IAuthService {
      * 校验密码是否匹配
      */
     private void checkPassword(String rawPassword, String encodedPassword) {
-        if (!userService.isPasswordMatch(rawPassword, encodedPassword)) {
+        if (Boolean.FALSE.equals(userService.isPasswordMatch(rawPassword, encodedPassword))) {
             throw new ServiceException(SysErrorCodeConstants.AUTH_LOGIN_BAD_CREDENTIALS);
         }
     }

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.yangjw.easyshare.framework.mybatis.core.dataobject.BaseDO;
-import com.yangjw.easyshare.module.system.enums.user.UserRoleEnum;
+import com.yangjw.easyshare.framework.common.enums.UserRoleEnum;
 import lombok.Data;
 
 import java.io.Serial;
@@ -125,7 +125,7 @@ public class UserDO extends BaseDO implements Serializable {
      * <p>
      * {@link UserRoleEnum}
      */
-    private Integer role;
+    private String role;
 
     /**
      * 状态：1正常 0禁用

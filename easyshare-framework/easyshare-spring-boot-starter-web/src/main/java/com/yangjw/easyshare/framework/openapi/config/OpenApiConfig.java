@@ -37,7 +37,7 @@ public class OpenApiConfig {
 
     /**
      * 0 基础
-     * 例如：/app/**
+     * 例如：/infra/**
      */
     @Bean
     public GroupedOpenApi infraApi() {
@@ -64,22 +64,10 @@ public class OpenApiConfig {
      * 例如：/app/**
      */
     @Bean
-    public GroupedOpenApi appWebApi() {
+    public GroupedOpenApi appApi() {
         return GroupedOpenApi.builder()
                 .group("2-用户端(Web)")
                 .pathsToMatch("/app/**")
-                .build();
-    }
-
-    /**
-     * 3 用户端（UniApp / 小程序）接口分组
-     * 例如：/uniapp/**
-     */
-    @Bean
-    public GroupedOpenApi uniAppApi() {
-        return GroupedOpenApi.builder()
-                .group("3-用户端(UniApp)")
-                .pathsToMatch("/uniapp/**")
                 .build();
     }
 }

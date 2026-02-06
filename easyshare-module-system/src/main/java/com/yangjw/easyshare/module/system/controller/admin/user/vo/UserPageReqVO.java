@@ -36,7 +36,7 @@ public class UserPageReqVO {
 
     /** 角色：1学生 2学校管理员 3超级管理员 */
     @Schema(description = "角色", example = "1")
-    private Integer role;
+    private String role;
 
     /** 状态：1正常 0禁用 */
     @Schema(description = "状态", example = "1")

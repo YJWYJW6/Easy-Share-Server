@@ -1,7 +1,7 @@
 package com.yangjw.easyshare.module.system.service.auth;
 
-import com.yangjw.easyshare.module.system.controller.admin.auth.vo.AuthLoginReqVO;
-import com.yangjw.easyshare.module.system.controller.admin.auth.vo.AuthLoginRespVO;
+import com.yangjw.easyshare.module.system.controller.vo.auth.AuthLoginReqVO;
+import com.yangjw.easyshare.module.system.controller.vo.auth.AuthLoginRespVO;
 
 /**
  * 用户 Service 接口

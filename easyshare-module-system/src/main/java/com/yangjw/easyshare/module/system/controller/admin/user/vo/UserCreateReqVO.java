@@ -41,7 +41,7 @@ public class UserCreateReqVO {
      */
     @NotNull(message = "角色不能为空")
     @Schema(description = "角色", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Integer role;
+    private String role;
 
     /**
      * 学校id

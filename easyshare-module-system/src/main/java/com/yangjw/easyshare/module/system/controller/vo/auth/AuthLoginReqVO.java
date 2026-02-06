@@ -1,4 +1,4 @@
-package com.yangjw.easyshare.module.system.controller.admin.auth.vo;
+package com.yangjw.easyshare.module.system.controller.vo.auth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

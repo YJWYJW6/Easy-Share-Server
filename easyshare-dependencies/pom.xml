@@ -149,6 +149,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.easyshare.boot</groupId>
+                <artifactId>easyshare-spring-boot-starter-biz-data-permission</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-3-starter</artifactId>
                 <version>${druid.version}</version>
